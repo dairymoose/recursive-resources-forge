@@ -1,0 +1,10 @@
+{
+  "recursiveresources.sort.a-z": "А-Я",
+  "recursiveresources.sort.z-a": "Я-А",
+  "recursiveresources.view.folder": "Папки",
+  "recursiveresources.view.flat": "Все",
+  "recursiveresources.folder.back": "(Назад)",
+  "recursiveresources.folder.folder": "(Папка)",
+  "availablepacks.title.hover": "Включить всё",
+  "selectedpacks.title.hover": "Выключить всё"
+}
