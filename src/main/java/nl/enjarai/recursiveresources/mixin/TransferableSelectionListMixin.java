@@ -45,18 +45,18 @@ public abstract class TransferableSelectionListMixin extends AbstractSelectionLi
                                                                @Share("mouseX") LocalIntRef mouseXRef, @Share("mouseY") LocalIntRef mouseYRef) {
         if (titleHoverText != null) {
             Component text = Component.empty().append(titleHoverText).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.BOLD, ChatFormatting.ITALIC);
-            int textWidth = client.font.width(text);
+            int textWidth = minecraft.font.width(text);
 
             int left = x + width / 2 - textWidth / 2;
-            int top = Math.min(this.top + 3, y);
+            int top = Math.min(this.height + 3, y);
             int right = left + textWidth;
-            int bottom = top + client.font.lineHeight;
+            int bottom = top + minecraft.font.lineHeight;
 
             int mouseX = mouseXRef.get();
             int mouseY = mouseYRef.get();
 
             if (mouseX >= x && mouseX <= x + width && mouseY >= top && mouseY <= bottom) {
-                context.drawString(client.font, text, left, top, 16777215, false);
+                context.drawString(minecraft.font, text, left, top, 16777215, false);
 
                 if (titleTooltip != null) {
                     screen.setTooltipForNextRenderPass(List.of(titleTooltip.getVisualOrderText()));
@@ -71,7 +71,7 @@ public abstract class TransferableSelectionListMixin extends AbstractSelectionLi
 
     @Override
     protected void recursiveresources$handleHeaderClick(int x, int y, CallbackInfo ci) {
-        if (titleClickEvent != null && y <= client.font.lineHeight) { //client.render.fontHeight
+        if (titleClickEvent != null && y <= minecraft.font.lineHeight) { //client.render.fontHeight
             titleClickEvent.run();
         }
     }

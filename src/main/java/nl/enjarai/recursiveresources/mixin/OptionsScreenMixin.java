@@ -21,14 +21,14 @@ public abstract class OptionsScreenMixin extends Screen {
     }
 
     @Shadow
-    protected abstract void refreshResourcePacks(PackRepository resourcePackManager);
+    protected abstract void applyPacks(PackRepository resourcePackManager);
 
     /**
      * @author recursiveresources
      * @reason Replace the resource packs screen with a custom one.
      */
     @Overwrite
-    private Screen method_47631() {
+    private Screen lambda$init$6() {
         var client = Minecraft.getInstance();
         var packRoots = new ArrayList<Path>();
         packRoots.add(client.getResourcePackDirectory());
@@ -43,7 +43,7 @@ public abstract class OptionsScreenMixin extends Screen {
 
         return new FolderedResourcePackScreen(
                 this, client.getResourcePackRepository(),
-                this::refreshResourcePacks, client.getResourcePackDirectory().toFile(),
+                this::applyPacks, client.getResourcePackDirectory().toFile(),
                 Component.translatable("resourcePack.title"),
                 packRoots
         );

@@ -25,7 +25,7 @@ public abstract class PackRepositoryMixin {
     private Set<RepositorySource> sources;
 
     @Inject(
-            method = "<init>([Lnet/minecraft/resource/RepositorySource;)V",
+            method = "<init>([Lnet/minecraft/server/packs/repository/RepositorySource;)V",
             at = @At("RETURN")
     )
     private void recursiveresources$onInit(CallbackInfo ci) {

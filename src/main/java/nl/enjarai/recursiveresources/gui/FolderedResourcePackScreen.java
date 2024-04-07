@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.packs.PackSelectionModel;
@@ -24,6 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.repository.PackRepository;
 import nl.enjarai.recursiveresources.RecursiveResources;
 import nl.enjarai.recursiveresources.pack.FolderMeta;
+import nl.enjarai.recursiveresources.pack.FolderPack;
 import nl.enjarai.recursiveresources.util.ResourcePackListProcessor;
 import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 
@@ -47,7 +49,7 @@ public class FolderedResourcePackScreen extends PackSelectionScreen {
 
     private TransferableSelectionList originalAvailablePacks;
     private TransferableSelectionList customAvailablePacks;
-    private StringWidget searchField;
+    private EditBox searchField;
 
     private Path currentFolder = ROOT_FOLDER;
     private FolderMeta currentFolderMeta;
@@ -80,7 +82,7 @@ public class FolderedResourcePackScreen extends PackSelectionScreen {
             btn.setX(width / 2 + 25);
             btn.setY(height - 26);
             if (btn instanceof Button button) {
-            	button.onPress = btn2 -> onClose();
+            	button.onPress = btn2 -> applyAndClose();
             }
         });
 
@@ -96,16 +98,16 @@ public class FolderedResourcePackScreen extends PackSelectionScreen {
                 .build()
         );
 
-        searchField = addRenderableWidget(new StringWidget(
-                width / 2 - 179, height - 46, 154, 16, Component.literal(""), this.font));
+        searchField = addRenderableWidget(new EditBox(
+        		this.font, width / 2 - 179, height - 46, 154, 16, searchField, Component.literal("")));
         searchField.setFocused(true);
-        //searchField.setChangedListener(listProcessor::setFilter);
+        searchField.setResponder(listProcessor::setFilter);
         addRenderableWidget(searchField);
 
         // Replacing the available pack list with our custom implementation
         originalAvailablePacks = availablePackList;
         removeWidget(originalAvailablePacks);
-        updateFocus(customAvailablePacks = new TransferableSelectionList(client, this, 200, height, availablePackList.title));
+        addWidget(customAvailablePacks = new TransferableSelectionList(client, this, 200, height, availablePackList.title));
         customAvailablePacks.setLeftPos(width / 2 - 204);
         // Make the title of the available packs selector clickable to load all packs
         ((FolderedTransferableSelectionList) customAvailablePacks).recursiveresources$setTitleClickable(AVAILABLE_PACKS_TITLE_HOVER, null, () -> {
@@ -184,10 +186,11 @@ public class FolderedResourcePackScreen extends PackSelectionScreen {
                             continue;
                         }
 
+                        
                         var entry = new ResourcePackFolderEntry(client, customAvailablePacks,
                                 this, relative);
 
-                        if (((PackSelectionModel.Entry) entry.pack).notHidden()) {
+                        if (((FolderPack) entry.pack).isVisible()) {
                             folders.add(entry);
                         }
                         createdFolders.add(relative);
@@ -231,7 +234,7 @@ public class FolderedResourcePackScreen extends PackSelectionScreen {
     @Override
     public void tick() {
         super.tick();
-        //searchField.
+        searchField.tick();
     }
 
     protected void applyAndClose() {

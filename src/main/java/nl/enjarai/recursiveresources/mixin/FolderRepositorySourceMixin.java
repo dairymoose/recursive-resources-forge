@@ -10,11 +10,13 @@ import net.minecraft.server.packs.repository.FolderRepositorySource;
 @Mixin(FolderRepositorySource.class)
 public abstract class FolderRepositorySourceMixin {
     @Redirect(
-            method = "getFactory",
+            method = "detectPackResources",
             at = @At(
                     value = "INVOKE",
-                    target = "Lorg/slf4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;)V"
+                    target = "Lorg/slf4j/Logger;info(Ljava/lang/String;Ljava/lang/Object;)V",
+                    remap = false
             )
+            
     )
     private static void recursiveresources$skipUnnessecaryLogging(Logger instance, String s, Object o) {
         // Don't log anything

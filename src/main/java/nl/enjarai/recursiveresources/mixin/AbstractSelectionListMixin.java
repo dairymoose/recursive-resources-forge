@@ -17,11 +17,11 @@ import net.minecraft.client.gui.components.AbstractSelectionList;
 
 @Mixin(AbstractSelectionList.class)
 public abstract class AbstractSelectionListMixin {
-    @Shadow @Final protected Minecraft client;
+    @Shadow @Final protected Minecraft minecraft;
 
     @Shadow protected int width;
 
-    @Shadow protected int top;
+    @Shadow protected int height;  //top?
 
     @Inject(
             method = "render",
@@ -37,7 +37,7 @@ public abstract class AbstractSelectionListMixin {
             method = "render",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/widget/AbstractSelectionList;renderHeader(Lnet/minecraft/client/gui/GuiGraphics;II)V"
+                    target = "Lnet/minecraft/client/gui/components/AbstractSelectionList;renderHeader(Lnet/minecraft/client/gui/GuiGraphics;II)V"
             )
     )
     protected boolean recursiveresources$modifyHeaderRendering(AbstractSelectionList<?> thiz, GuiGraphics context, int x, int y,

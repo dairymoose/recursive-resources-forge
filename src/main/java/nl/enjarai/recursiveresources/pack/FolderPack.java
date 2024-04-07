@@ -21,8 +21,8 @@ import net.minecraft.server.packs.repository.PackSource;
 import nl.enjarai.recursiveresources.RecursiveResources;
 
 public class FolderPack implements PackSelectionModel.Entry {
-    private static final ResourceLocation FOLDER_TEXTURE = RecursiveResources.id("Componentures/gui/folder.png");
-    private static final ResourceLocation OPEN_FOLDER_TEXTURE = RecursiveResources.id("Componentures/gui/folder_open.png");
+    private static final ResourceLocation FOLDER_TEXTURE = RecursiveResources.id("textures/gui/folder.png");
+    private static final ResourceLocation OPEN_FOLDER_TEXTURE = RecursiveResources.id("textures/gui/folder_open.png");
 
     private static ResourceLocation loadCustomIcon(Path icon, Path relativeFolder) {
         if (icon != null && Files.exists(icon)) {
@@ -33,7 +33,7 @@ public class FolderPack implements PackSelectionModel.Entry {
                 // Ensure the path only contains "a-z0-9_.-" characters
                 relativePath = relativePath.toLowerCase().replaceAll("[^a-zA-Z0-9_.-]", "_");
 
-                ResourceLocation id = new ResourceLocation("recursiveresources", "Componentures/gui/custom_folders/" + relativePath + "icon.png");
+                ResourceLocation id = new ResourceLocation("recursiveresources", "textures/gui/custom_folders/" + relativePath + "icon.png");
                 Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(NativeImage.read(stream)));
                 return id;
             } catch (Exception e) {
@@ -147,19 +147,16 @@ public class FolderPack implements PackSelectionModel.Entry {
 
 	@Override
 	public boolean isSelected() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void select() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void unselect() {
 		// TODO Auto-generated method stub
-		
 	}
 }

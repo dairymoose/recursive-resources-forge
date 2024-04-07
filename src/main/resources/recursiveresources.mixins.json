@@ -2,14 +2,15 @@
   "required": true,
   "package": "nl.enjarai.recursiveresources.mixin",
   "compatibilityLevel": "JAVA_17",
+  "refmap": "recursiveresources.refmap.json",
   "mixins": [
-    "FileResourcePackProviderMixin"
+    "FolderRepositorySourceMixin"
   ],
   "client": [
-    "EntryListWidgetMixin",
+    "AbstractSelectionListMixin",
     "OptionsScreenMixin",
-    "PackListWidgetMixin",
-    "ResourcePackManagerMixin"
+    "TransferableSelectionListMixin",
+    "PackRepositoryMixin"
   ],
   "injectors": {
     "defaultRequire": 1
