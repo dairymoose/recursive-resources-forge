@@ -1,11 +1,5 @@
 package nl.enjarai.recursiveresources.util;
 
-import net.fabricmc.fabric.impl.resource.loader.ModNioResourcePack;
-import net.minecraft.resource.DirectoryResourcePack;
-import net.minecraft.resource.ResourcePack;
-import net.minecraft.resource.ZipResourcePack;
-import nl.enjarai.recursiveresources.RecursiveResources;
-
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,27 +33,27 @@ public class ResourcePackUtils {
         return Files.isDirectory(fileOrFolder) ? isFolderBasedPack(fileOrFolder) : fileOrFolder.toString().endsWith(".zip");
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    public static Path determinePackFolder(ResourcePack pack) {
-        try {
-            if (pack instanceof DirectoryResourcePack directoryResourcePack) {
-                return directoryResourcePack.root;
-            } else if (pack instanceof ZipResourcePack zipResourcePack) {
-                return zipResourcePack.backingZipFile.toPath();
-            } else if (pack instanceof ModNioResourcePack modResourcePack) {
-                return Path.of(modResourcePack.getName().replaceAll(UNSAFE_PATH_REGEX, "_"));
-            } else {
-                RecursiveResources.LOGGER.warn("Failed to determine source folder for pack: " + pack.getName() + ", unknown pack type: " + pack.getClass().getName());
-                return null;
-            }
-        } catch (Exception e) {
-            RecursiveResources.LOGGER.error("Error determining source folder for pack: " + pack.getName(), e);
-            return null;
-        }
-    }
+//    @SuppressWarnings("UnstableApiUsage")
+//    public static Path determinePackFolder(ResourcePack pack) {
+//        try {
+//            if (pack instanceof DirectoryResourcePack directoryResourcePack) {
+//                return directoryResourcePack.root;
+//            } else if (pack instanceof ZipResourcePack zipResourcePack) {
+//                return zipResourcePack.backingZipFile.toPath();
+//            } else if (pack instanceof ModNioResourcePack modResourcePack) {
+//                return Path.of(modResourcePack.getName().replaceAll(UNSAFE_PATH_REGEX, "_"));
+//            } else {
+//                RecursiveResources.LOGGER.warn("Failed to determine source folder for pack: " + pack.getName() + ", unknown pack type: " + pack.getClass().getName());
+//                return null;
+//            }
+//        } catch (Exception e) {
+//            RecursiveResources.LOGGER.error("Error determining source folder for pack: " + pack.getName(), e);
+//            return null;
+//        }
+//    }
 
-    public static boolean isChildOfFolder(Path folder, ResourcePack pack) {
-        var packFolder = determinePackFolder(pack);
-        return packFolder != null && packFolder.toAbsolutePath().startsWith(folder.toAbsolutePath());
-    }
+//    public static boolean isChildOfFolder(Path folder, ResourcePack pack) {
+//        var packFolder = determinePackFolder(pack);
+//        return packFolder != null && packFolder.toAbsolutePath().startsWith(folder.toAbsolutePath());
+//    }
 }

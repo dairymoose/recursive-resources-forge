@@ -1,24 +1,25 @@
 package nl.enjarai.recursiveresources.pack;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.client.gui.screen.pack.PackListWidget;
-import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
-import net.minecraft.resource.ResourcePackSource;
-import nl.enjarai.recursiveresources.RecursiveResources;
-import nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry;
-import nl.enjarai.recursiveresources.util.ResourcePackUtils;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import net.minecraft.client.gui.screens.packs.PackSelectionModel;
+import net.minecraft.client.gui.screens.packs.TransferableSelectionList;
+import net.minecraft.server.packs.repository.PackSource;
+import nl.enjarai.recursiveresources.RecursiveResources;
+import nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry;
+import nl.enjarai.recursiveresources.util.ResourcePackUtils;
 
 public record FolderMeta(Path icon, String description, List<Path> packs, boolean hidden) {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -103,8 +104,8 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
         return new FolderMeta(icon, description, Collections.unmodifiableList(packs), hidden);
     }
 
-    public int sortEntry(PackListWidget.ResourcePackEntry entry, Path folder) {
-        if (entry.pack.getSource() instanceof FolderedPackSource folderedPackSource) {
+    public int sortEntry(TransferableSelectionList.PackEntry entry, Path folder) {
+        if (entry.pack.getPackSource() instanceof FolderedPackSource folderedPackSource) {
             var packIndex = packs().indexOf(relativiseRelativePath(folder, folderedPackSource.file()));
             if (packIndex != -1) return packIndex;
         }
@@ -114,21 +115,22 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
         return Integer.MAX_VALUE;
     }
 
-    public boolean containsEntry(PackListWidget.ResourcePackEntry entry, Path folder) {
+    public boolean containsEntry(TransferableSelectionList.PackEntry entry, Path folder) {
         Path pack;
 
-        if (entry.pack.getSource() instanceof FolderedPackSource folderedPackSource) {
+        if (entry.pack.getPackSource() instanceof FolderedPackSource folderedPackSource) {
             pack = folderedPackSource.file();
-        } else if (entry.pack.getSource() == ResourcePackSource.BUILTIN) {
-            pack = EMPTY_PATH.resolve(entry.getName());
+        } else if (entry.pack.getPackSource() == PackSource.BUILT_IN) {
+            pack = EMPTY_PATH.resolve(entry.getPackId());
 
             if (folder.equals(EMPTY_PATH)) return true;
         } else {
-            Path fsPath = ResourcePackUtils.determinePackFolder(((ResourcePackOrganizer.AbstractPack) entry.pack).profile.createResourcePack());
-
-            if (fsPath == null) return false;
-
-            pack = EMPTY_PATH.resolve(fsPath.getFileName());
+//            Path fsPath = ResourcePackUtils.determinePackFolder((PackSelectionModel.EntryBase) entry.pack).profile.createResourcePack());
+//
+//            if (fsPath == null) return false;
+//
+//            pack = EMPTY_PATH.resolve(fsPath.getFileName());
+        	return false;
         }
 
         Path relativePath = relativiseRelativePath(folder, pack);

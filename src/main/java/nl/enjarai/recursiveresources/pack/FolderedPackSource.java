@@ -1,18 +1,18 @@
 package nl.enjarai.recursiveresources.pack;
 
-import net.minecraft.resource.ResourcePackSource;
-import net.minecraft.text.Text;
-
 import java.nio.file.Path;
 
-public record FolderedPackSource(Path root, Path file) implements ResourcePackSource {
-    @Override
-    public Text decorate(Text packName) {
-        return packName;
-    }
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.repository.PackSource;
 
-    @Override
-    public boolean canBeEnabledLater() {
-        return true;
-    }
+public record FolderedPackSource(Path root, Path file) implements PackSource {
+	@Override
+	public Component decorate(Component packName) {
+		return packName;
+	}
+
+	@Override
+	public boolean shouldAddAutomatically() {
+		return true;
+	}
 }

@@ -1,25 +1,26 @@
 package nl.enjarai.recursiveresources.util;
 
-import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
-import nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
+import net.minecraft.client.gui.screens.packs.TransferableSelectionList;
+import nl.enjarai.recursiveresources.gui.ResourcePackFolderEntry;
+
 public class ResourcePackListProcessor {
-    private static String name(ResourcePackEntry entry) {
-        return entry == null ? "<INVALID>" : entry.pack.getDisplayName().getString();
+    private static String name(TransferableSelectionList.PackEntry entry) {
+        return entry == null ? "<INVALID>" : entry.pack.getTitle().getString();
     }
 
-    private static String description(ResourcePackEntry entry) {
+    private static String description(TransferableSelectionList.PackEntry entry) {
         return entry == null ? "<INVALID>" : entry.pack.getDescription().getString();
     }
 
-    private static String nameSort(ResourcePackEntry entry, boolean reverse) {
+    private static String nameSort(TransferableSelectionList.PackEntry entry, boolean reverse) {
         String pfx1 = !reverse ? "a" : "z";
         String pfx2 = !reverse ? "b" : "y";
         String pfx3 = !reverse ? "x" : "a";
@@ -31,13 +32,13 @@ public class ResourcePackListProcessor {
         }
     }
 
-    public static final Comparator<ResourcePackEntry> sortAZ = (entry1, entry2) -> String.CASE_INSENSITIVE_ORDER.compare(nameSort(entry1, false), nameSort(entry2, false));
-    public static final Comparator<ResourcePackEntry> sortZA = (entry1, entry2) -> -String.CASE_INSENSITIVE_ORDER.compare(nameSort(entry1, true), nameSort(entry2, true));
+    public static final Comparator<TransferableSelectionList.PackEntry> sortAZ = (entry1, entry2) -> String.CASE_INSENSITIVE_ORDER.compare(nameSort(entry1, false), nameSort(entry2, false));
+    public static final Comparator<TransferableSelectionList.PackEntry> sortZA = (entry1, entry2) -> -String.CASE_INSENSITIVE_ORDER.compare(nameSort(entry1, true), nameSort(entry2, true));
 
     private final Runnable callback;
     private int pauseCallback;
 
-    private Comparator<ResourcePackEntry> sorter;
+    private Comparator<TransferableSelectionList.PackEntry> sorter;
     private Pattern textFilter;
     private String lastTextFilter;
 
@@ -62,7 +63,7 @@ public class ResourcePackListProcessor {
         }
     }
 
-    public void setSorter(Comparator<ResourcePackEntry> comparator) {
+    public void setSorter(Comparator<TransferableSelectionList.PackEntry> comparator) {
         this.sorter = comparator;
         tryRunCallback();
     }
@@ -77,7 +78,7 @@ public class ResourcePackListProcessor {
         }
     }
 
-    public void apply(List<ResourcePackEntry> sourceList, List<ResourcePackEntry> extraList, List<ResourcePackEntry> targetList) {
+    public void apply(List<TransferableSelectionList.PackEntry> sourceList, List<TransferableSelectionList.PackEntry> extraList, List<TransferableSelectionList.PackEntry> targetList) {
         targetList.clear();
         addMatching(sourceList, targetList);
 
@@ -90,8 +91,8 @@ public class ResourcePackListProcessor {
         }
     }
 
-    private void addMatching(List<ResourcePackEntry> source, List<ResourcePackEntry> target) {
-        for (ResourcePackEntry entry : source) {
+    private void addMatching(List<TransferableSelectionList.PackEntry> source, List<TransferableSelectionList.PackEntry> target) {
+        for (TransferableSelectionList.PackEntry entry : source) {
             if (checkFilter(name(entry)) || checkFilter(description(entry))) {
                 target.add(entry);
             }

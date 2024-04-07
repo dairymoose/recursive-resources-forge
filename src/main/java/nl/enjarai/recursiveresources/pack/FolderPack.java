@@ -1,27 +1,30 @@
 package nl.enjarai.recursiveresources.pack;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.pack.ResourcePackOrganizer;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.resource.ResourcePackCompatibility;
-import net.minecraft.resource.ResourcePackSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import nl.enjarai.recursiveresources.RecursiveResources;
-import org.apache.logging.log4j.LogManager;
-import org.jetbrains.annotations.Nullable;
-
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.function.Function;
 
-public class FolderPack implements ResourcePackOrganizer.Pack {
-    private static final Identifier FOLDER_TEXTURE = RecursiveResources.id("textures/gui/folder.png");
-    private static final Identifier OPEN_FOLDER_TEXTURE = RecursiveResources.id("textures/gui/folder_open.png");
+import org.jetbrains.annotations.Nullable;
 
-    private static Identifier loadCustomIcon(Path icon, Path relativeFolder) {
+import com.mojang.blaze3d.platform.NativeImage;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.packs.PackSelectionModel;
+import net.minecraft.client.renderer.texture.AbstractTexture;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.repository.PackCompatibility;
+import net.minecraft.server.packs.repository.PackSource;
+import nl.enjarai.recursiveresources.RecursiveResources;
+
+public class FolderPack implements PackSelectionModel.Entry {
+    private static final ResourceLocation FOLDER_TEXTURE = RecursiveResources.id("Componentures/gui/folder.png");
+    private static final ResourceLocation OPEN_FOLDER_TEXTURE = RecursiveResources.id("Componentures/gui/folder_open.png");
+
+    private static ResourceLocation loadCustomIcon(Path icon, Path relativeFolder) {
         if (icon != null && Files.exists(icon)) {
             try (InputStream stream = Files.newInputStream(icon)) {
                 // Get the path relative to the resourcepacks directory
@@ -30,8 +33,8 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
                 // Ensure the path only contains "a-z0-9_.-" characters
                 relativePath = relativePath.toLowerCase().replaceAll("[^a-zA-Z0-9_.-]", "_");
 
-                Identifier id = new Identifier("recursiveresources", "textures/gui/custom_folders/" + relativePath + "icon.png");
-                MinecraftClient.getInstance().getTextureManager().registerTexture(id, new NativeImageBackedTexture(NativeImage.read(stream)));
+                ResourceLocation id = new ResourceLocation("recursiveresources", "Componentures/gui/custom_folders/" + relativePath + "icon.png");
+                Minecraft.getInstance().getTextureManager().register(id, new DynamicTexture(NativeImage.read(stream)));
                 return id;
             } catch (Exception e) {
                 RecursiveResources.LOGGER.warn("Error loading custom folder icon:");
@@ -41,20 +44,20 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
         return null;
     }
 
-    private final Text displayName;
-    private final Text description;
+    private final Component displayName;
+    private final Component description;
     @Nullable
-    private Identifier icon = null;
+    private ResourceLocation icon = null;
     private final FolderMeta meta;
 
     private boolean hovered = false;
 
-    public FolderPack(Text displayName, Text description, Function<Path, Path> iconFileResolver, Path relativeFolder, FolderMeta meta) {
+    public FolderPack(Component displayName, Component description, Function<Path, Path> iconFileResolver, Path relativeFolder, FolderMeta meta) {
         this.displayName = displayName;
         if (meta.description().equals("")) {
             this.description = description;
         } else {
-            this.description = Text.of(meta.description());
+            this.description = Component.literal(meta.description());
         }
         this.icon = loadCustomIcon(iconFileResolver.apply(meta.icon()), relativeFolder);
         this.meta = meta;
@@ -65,77 +68,72 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
     }
 
     @Override
-    public Identifier getIconId() {
+    public ResourceLocation getIconTexture() {
         return icon != null ? icon : (hovered ? OPEN_FOLDER_TEXTURE : FOLDER_TEXTURE);
     }
 
     @Override
-    public ResourcePackCompatibility getCompatibility() {
-        return ResourcePackCompatibility.COMPATIBLE;
+    public PackCompatibility getCompatibility() {
+        return PackCompatibility.COMPATIBLE;
     }
 
     @Override
-    public String getName() {
+    public String getId() {
         return displayName.getString();
     }
 
     @Override
-    public Text getDisplayName() {
+    public Component getTitle() {
         return displayName;
     }
 
     @Override
-    public Text getDescription() {
+    public Component getDescription() {
         return description;
     }
 
     @Override
-    public ResourcePackSource getSource() {
-        return ResourcePackSource.NONE;
+    public PackSource getPackSource() {
+        return PackSource.DEFAULT;
     }
 
     @Override
-    public boolean isPinned() {
+    public boolean isFixedPosition() {
         return true;
     }
 
     @Override
-    public boolean isAlwaysEnabled() {
+    public boolean isRequired() {
         return true;
     }
 
+//    @Override
+//    public void updateHighContrastOptionInstance() {
+//
+//    }
+
     @Override
-    public void enable() {
+    public void moveUp() {
 
     }
 
     @Override
-    public void disable() {
+    public void moveDown() {
 
     }
 
     @Override
-    public void moveTowardStart() {
-
-    }
-
-    @Override
-    public void moveTowardEnd() {
-
-    }
-
-    @Override
-    public boolean isEnabled() {
+    public boolean notHidden() {
         return false;
     }
 
     @Override
-    public boolean canMoveTowardStart() {
+    public boolean canMoveUp() {
         return false;
     }
 
     @Override
-    public boolean canMoveTowardEnd() {
+    public boolean canMoveDown() {
         return false;
     }
 
@@ -146,4 +144,22 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
     public boolean isVisible() {
         return !meta.hidden();
     }
+
+	@Override
+	public boolean isSelected() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void select() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void unselect() {
+		// TODO Auto-generated method stub
+		
+	}
 }

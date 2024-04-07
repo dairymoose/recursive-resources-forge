@@ -1,13 +1,14 @@
 package nl.enjarai.recursiveresources.mixin;
 
-import net.minecraft.resource.FileResourcePackProvider;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(FileResourcePackProvider.class)
-public abstract class FileResourcePackProviderMixin {
+import net.minecraft.server.packs.repository.FolderRepositorySource;
+
+@Mixin(FolderRepositorySource.class)
+public abstract class FolderRepositorySourceMixin {
     @Redirect(
             method = "getFactory",
             at = @At(

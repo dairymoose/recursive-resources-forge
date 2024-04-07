@@ -1,11 +1,12 @@
 package nl.enjarai.recursiveresources.gui;
 
-import net.minecraft.client.gui.widget.TexturedButtonWidget;
-import net.minecraft.client.sound.SoundManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.resources.ResourceLocation;
 
-public class SilentTexturedButtonWidget extends TexturedButtonWidget {
-    public SilentTexturedButtonWidget(int x, int y, int width, int height, int u, int v, Identifier texture, PressAction pressAction) {
+public class SilentTexturedButtonWidget extends ImageButton {
+    public SilentTexturedButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, Button.OnPress pressAction) {
         super(x, y, width, height, u, v, texture, pressAction);
     }
 

@@ -1,29 +1,27 @@
 package nl.enjarai.recursiveresources.mixin;
 
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.option.OptionsScreen;
-import net.minecraft.resource.ResourcePackManager;
-import net.minecraft.text.Text;
-import nl.enjarai.recursiveresources.gui.FolderedResourcePackScreen;
-import nl.enjarai.shared_resources.api.DefaultGameResources;
-import nl.enjarai.shared_resources.api.GameResourceHelper;
+import java.nio.file.Path;
+import java.util.ArrayList;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.nio.file.Path;
-import java.util.ArrayList;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.OptionsScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.repository.PackRepository;
+import nl.enjarai.recursiveresources.gui.FolderedResourcePackScreen;
 
 @Mixin(OptionsScreen.class)
 public abstract class OptionsScreenMixin extends Screen {
-    protected OptionsScreenMixin(Text title) {
+    protected OptionsScreenMixin(Component title) {
         super(title);
     }
 
     @Shadow
-    protected abstract void refreshResourcePacks(ResourcePackManager resourcePackManager);
+    protected abstract void refreshResourcePacks(PackRepository resourcePackManager);
 
     /**
      * @author recursiveresources
@@ -31,22 +29,22 @@ public abstract class OptionsScreenMixin extends Screen {
      */
     @Overwrite
     private Screen method_47631() {
-        var client = MinecraftClient.getInstance();
+        var client = Minecraft.getInstance();
         var packRoots = new ArrayList<Path>();
-        packRoots.add(client.getResourcePackDir());
+        packRoots.add(client.getResourcePackDirectory());
 
-        if (FabricLoader.getInstance().isModLoaded("shared-resources")) {
-            var directory = GameResourceHelper.getPathFor(DefaultGameResources.RESOURCEPACKS);
-
-            if (directory != null) {
-                packRoots.add(directory);
-            }
-        }
+//        if (FabricLoader.getInstance().isModLoaded("shared-resources")) {
+//            var directory = GameResourceHelper.getPathFor(DefaultGameResources.RESOURCEPACKS);
+//
+//            if (directory != null) {
+//                packRoots.add(directory);
+//            }
+//        }
 
         return new FolderedResourcePackScreen(
-                this, client.getResourcePackManager(),
-                this::refreshResourcePacks, client.getResourcePackDir().toFile(),
-                Text.translatable("resourcePack.title"),
+                this, client.getResourcePackRepository(),
+                this::refreshResourcePacks, client.getResourcePackDirectory().toFile(),
+                Component.translatable("resourcePack.title"),
                 packRoots
         );
     }

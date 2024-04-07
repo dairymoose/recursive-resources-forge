@@ -1,11 +1,5 @@
 package nl.enjarai.recursiveresources.mixin;
 
-import com.llamalad7.mixinextras.injector.WrapWithCondition;
-import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.EntryListWidget;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -13,9 +7,17 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(EntryListWidget.class)
-public abstract class EntryListWidgetMixin {
-    @Shadow @Final protected MinecraftClient client;
+import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+
+@Mixin(AbstractSelectionList.class)
+public abstract class AbstractSelectionListMixin {
+    @Shadow @Final protected Minecraft client;
 
     @Shadow protected int width;
 
@@ -25,7 +27,7 @@ public abstract class EntryListWidgetMixin {
             method = "render",
             at = @At("HEAD")
     )
-    private void recursiveresources$captureParams(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci,
+    private void recursiveresources$captureParams(GuiGraphics context, int mouseX, int mouseY, float delta, CallbackInfo ci,
                                                   @Share("mouseX") LocalIntRef mouseXRef, @Share("mouseY") LocalIntRef mouseYRef) {
         mouseXRef.set(mouseX);
         mouseYRef.set(mouseY);
@@ -35,10 +37,10 @@ public abstract class EntryListWidgetMixin {
             method = "render",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/widget/EntryListWidget;renderHeader(Lnet/minecraft/client/gui/DrawContext;II)V"
+                    target = "Lnet/minecraft/client/gui/widget/AbstractSelectionList;renderHeader(Lnet/minecraft/client/gui/GuiGraphics;II)V"
             )
     )
-    protected boolean recursiveresources$modifyHeaderRendering(EntryListWidget<?> thiz, DrawContext context, int x, int y,
+    protected boolean recursiveresources$modifyHeaderRendering(AbstractSelectionList<?> thiz, GuiGraphics context, int x, int y,
                                                                @Share("mouseX") LocalIntRef mouseXRef, @Share("mouseY") LocalIntRef mouseYRef) {
         return true;
     }

@@ -1,22 +1,5 @@
 package nl.enjarai.recursiveresources.gui;
 
-import com.google.common.collect.Lists;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.pack.PackListWidget;
-import net.minecraft.client.gui.screen.pack.PackListWidget.ResourcePackEntry;
-import net.minecraft.client.gui.screen.pack.PackScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.resource.ResourcePackManager;
-import net.minecraft.text.Text;
-import nl.enjarai.recursiveresources.RecursiveResources;
-import nl.enjarai.recursiveresources.pack.FolderMeta;
-import nl.enjarai.recursiveresources.pack.FolderPack;
-import nl.enjarai.recursiveresources.util.ResourcePackListProcessor;
-import nl.enjarai.recursiveresources.util.ResourcePackUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,34 +10,51 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class FolderedResourcePackScreen extends PackScreen {
+import com.google.common.collect.Lists;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.packs.PackSelectionModel;
+import net.minecraft.client.gui.screens.packs.PackSelectionScreen;
+import net.minecraft.client.gui.screens.packs.TransferableSelectionList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.repository.PackRepository;
+import nl.enjarai.recursiveresources.RecursiveResources;
+import nl.enjarai.recursiveresources.pack.FolderMeta;
+import nl.enjarai.recursiveresources.util.ResourcePackListProcessor;
+import nl.enjarai.recursiveresources.util.ResourcePackUtils;
+
+public class FolderedResourcePackScreen extends PackSelectionScreen {
     private static final Path ROOT_FOLDER = Path.of("");
 
-    private static final Text OPEN_PACK_FOLDER = Text.translatable("pack.openFolder");
-    private static final Text DONE = Text.translatable("gui.done");
-    private static final Text SORT_AZ = Text.translatable("recursiveresources.sort.a-z");
-    private static final Text SORT_ZA = Text.translatable("recursiveresources.sort.z-a");
-    private static final Text VIEW_FOLDER = Text.translatable("recursiveresources.view.folder");
-    private static final Text VIEW_FLAT = Text.translatable("recursiveresources.view.flat");
-    private static final Text AVAILABLE_PACKS_TITLE_HOVER = Text.translatable("recursiveresources.availablepacks.title.hover");
-    private static final Text SELECTED_PACKS_TITLE_HOVER = Text.translatable("recursiveresources.selectedpacks.title.hover");
+    private static final Component OPEN_PACK_FOLDER = Component.translatable("pack.openFolder");
+    private static final Component DONE = Component.translatable("gui.done");
+    private static final Component SORT_AZ = Component.translatable("recursiveresources.sort.a-z");
+    private static final Component SORT_ZA = Component.translatable("recursiveresources.sort.z-a");
+    private static final Component VIEW_FOLDER = Component.translatable("recursiveresources.view.folder");
+    private static final Component VIEW_FLAT = Component.translatable("recursiveresources.view.flat");
+    private static final Component AVAILABLE_PACKS_TITLE_HOVER = Component.translatable("recursiveresources.availablepacks.title.hover");
+    private static final Component SELECTED_PACKS_TITLE_HOVER = Component.translatable("recursiveresources.selectedpacks.title.hover");
 
-    protected final MinecraftClient client = MinecraftClient.getInstance();
+    protected final Minecraft client = Minecraft.getInstance();
     protected final Screen parent;
 
-    private final ResourcePackListProcessor listProcessor = new ResourcePackListProcessor(this::refresh);
-    private Comparator<ResourcePackEntry> currentSorter;
+    private final ResourcePackListProcessor listProcessor = new ResourcePackListProcessor(this::reload);
+    private Comparator<TransferableSelectionList.PackEntry> currentSorter;
 
-    private PackListWidget originalAvailablePacks;
-    private PackListWidget customAvailablePacks;
-    private TextFieldWidget searchField;
+    private TransferableSelectionList originalAvailablePacks;
+    private TransferableSelectionList customAvailablePacks;
+    private StringWidget searchField;
 
     private Path currentFolder = ROOT_FOLDER;
     private FolderMeta currentFolderMeta;
     private boolean folderView = true;
     public final List<Path> roots;
 
-    public FolderedResourcePackScreen(Screen parent, ResourcePackManager packManager, Consumer<ResourcePackManager> applier, File mainRoot, Text title, List<Path> roots) {
+    public FolderedResourcePackScreen(Screen parent, PackRepository packManager, Consumer<PackRepository> applier, File mainRoot, Component title, List<Path> roots) {
         super(packManager, applier, mainRoot.toPath(), title);
         this.parent = parent;
         this.roots = roots;
@@ -70,7 +70,7 @@ public class FolderedResourcePackScreen extends PackScreen {
     @Override
     protected void init() {
         super.init();
-
+        
         findButton(OPEN_PACK_FOLDER).ifPresent(btn -> {
             btn.setX(width / 2 + 25);
             btn.setY(height - 48);
@@ -79,70 +79,70 @@ public class FolderedResourcePackScreen extends PackScreen {
         findButton(DONE).ifPresent(btn -> {
             btn.setX(width / 2 + 25);
             btn.setY(height - 26);
-            if (btn instanceof ButtonWidget button) {
-                button.onPress = btn2 -> applyAndClose();
+            if (btn instanceof Button button) {
+            	button.onPress = btn2 -> onClose();
             }
         });
 
-        addDrawableChild(
-                ButtonWidget.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
+        addRenderableWidget(
+                Button.builder(folderView ? VIEW_FOLDER : VIEW_FLAT, btn -> {
                     folderView = !folderView;
                     btn.setMessage(folderView ? VIEW_FOLDER : VIEW_FLAT);
 
-                    refresh();
+                    reload();
                     customAvailablePacks.setScrollAmount(0.0);
                 })
-                .dimensions(width / 2 - 179, height - 26, 154, 20)
+                .bounds(width / 2 - 179, height - 26, 154, 20)
                 .build()
         );
 
-        searchField = addDrawableChild(new TextFieldWidget(
-                textRenderer, width / 2 - 179, height - 46, 154, 16, searchField, Text.of("")));
-        searchField.setFocusUnlocked(true);
-        searchField.setChangedListener(listProcessor::setFilter);
-        addDrawableChild(searchField);
+        searchField = addRenderableWidget(new StringWidget(
+                width / 2 - 179, height - 46, 154, 16, Component.literal(""), this.font));
+        searchField.setFocused(true);
+        //searchField.setChangedListener(listProcessor::setFilter);
+        addRenderableWidget(searchField);
 
         // Replacing the available pack list with our custom implementation
         originalAvailablePacks = availablePackList;
-        remove(originalAvailablePacks);
-        addSelectableChild(customAvailablePacks = new PackListWidget(client, this, 200, height, availablePackList.title));
+        removeWidget(originalAvailablePacks);
+        updateFocus(customAvailablePacks = new TransferableSelectionList(client, this, 200, height, availablePackList.title));
         customAvailablePacks.setLeftPos(width / 2 - 204);
         // Make the title of the available packs selector clickable to load all packs
-        ((FolderedPackListWidget) customAvailablePacks).recursiveresources$setTitleClickable(AVAILABLE_PACKS_TITLE_HOVER, null, () -> {
-            for (ResourcePackEntry entry : Lists.reverse(List.copyOf(availablePackList.children()))) {
-                if (entry.pack.canBeEnabled()) {
-                    entry.pack.enable();
+        ((FolderedTransferableSelectionList) customAvailablePacks).recursiveresources$setTitleClickable(AVAILABLE_PACKS_TITLE_HOVER, null, () -> {
+            for (TransferableSelectionList.PackEntry entry : Lists.reverse(List.copyOf(availablePackList.children()))) {
+                if (entry.pack.canSelect()) {
+                    entry.pack.select();
                 }
             }
         });
         availablePackList = customAvailablePacks;
 
         // Also make the selected packs title clickable to unload them
-        ((FolderedPackListWidget) selectedPackList).recursiveresources$setTitleClickable(SELECTED_PACKS_TITLE_HOVER, null, () -> {
-            for (ResourcePackEntry entry : List.copyOf(selectedPackList.children())) {
-                if (entry.pack.canBeDisabled()) {
-                    entry.pack.disable();
+        ((FolderedTransferableSelectionList) selectedPackList).recursiveresources$setTitleClickable(SELECTED_PACKS_TITLE_HOVER, null, () -> {
+            for (TransferableSelectionList.PackEntry entry : List.copyOf(selectedPackList.children())) {
+                if (entry.pack.canUnselect()) {
+                    entry.pack.unselect();
                 }
             }
         });
 
         listProcessor.pauseCallback();
         listProcessor.setSorter(currentSorter == null ? (currentSorter = ResourcePackListProcessor.sortAZ) : currentSorter);
-        listProcessor.setFilter(searchField.getText());
+        listProcessor.setFilter(searchField.getMessage().getString()); //wrong?
         listProcessor.resumeCallback();
     }
 
-    private Optional<ClickableWidget> findButton(Text text) {
+    private Optional<AbstractButton> findButton(Component text) {
         return children.stream()
-                .filter(ClickableWidget.class::isInstance)
-                .map(ClickableWidget.class::cast)
+                .filter(AbstractButton.class::isInstance)
+                .map(AbstractButton.class::cast)
                 .filter(btn -> text.equals(btn.getMessage()))
                 .findFirst();
     }
 
     @Override
-    public void updatePackLists() {
-        super.updatePackLists();
+    public void populateLists() {
+        super.populateLists();
         if (customAvailablePacks != null) {
             onFiltersUpdated();
         }
@@ -160,7 +160,7 @@ public class FolderedResourcePackScreen extends PackScreen {
     }
 
     private void onFiltersUpdated() {
-        List<ResourcePackEntry> folders = null;
+        List<TransferableSelectionList.PackEntry> folders = null;
 
         if (folderView) {
             folders = new ArrayList<>();
@@ -187,7 +187,7 @@ public class FolderedResourcePackScreen extends PackScreen {
                         var entry = new ResourcePackFolderEntry(client, customAvailablePacks,
                                 this, relative);
 
-                        if (((FolderPack) entry.pack).isVisible()) {
+                        if (((PackSelectionModel.Entry) entry.pack).notHidden()) {
                             folders.add(entry);
                         }
                         createdFolders.add(relative);
@@ -222,7 +222,7 @@ public class FolderedResourcePackScreen extends PackScreen {
     public void moveToFolder(Path folder) {
         currentFolder = folder;
         currentFolderMeta = FolderMeta.loadMetaFile(roots, currentFolder);
-        refresh();
+        reload();
         customAvailablePacks.setScrollAmount(0.0);
     }
 
@@ -231,18 +231,18 @@ public class FolderedResourcePackScreen extends PackScreen {
     @Override
     public void tick() {
         super.tick();
-        searchField.tick();
+        //searchField.
     }
 
     protected void applyAndClose() {
-        organizer.apply();
-        closeDirectoryWatcher();
+    	this.model.commit();
+        closeWatcher();
     }
 
     @Override
-    public void close() {
-        closeDirectoryWatcher();
+    public void onClose() {
+        closeWatcher();
         client.setScreen(parent);
-        client.options.addResourcePackProfilesToManager(client.getResourcePackManager());
+        client.options.loadSelectedResourcePacks(client.getResourcePackRepository());
     }
 }

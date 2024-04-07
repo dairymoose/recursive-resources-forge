@@ -1,32 +1,32 @@
 package nl.enjarai.recursiveresources;
 
-import net.fabricmc.api.ClientModInitializer;
-import net.minecraft.util.Identifier;
-import nl.enjarai.cicada.api.conversation.ConversationManager;
-import nl.enjarai.cicada.api.util.CicadaEntrypoint;
-import nl.enjarai.cicada.api.util.JsonSource;
-import nl.enjarai.cicada.api.util.ProperLogger;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class RecursiveResources implements ClientModInitializer, CicadaEntrypoint {
-    public static final String MOD_ID = "recursiveresources";
-    public static final Logger LOGGER = ProperLogger.getLogger(MOD_ID);
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.common.Mod;
 
-    @Override
-    public void onInitializeClient() {
-
+// The value here should match an entry in the META-INF/mods.toml file
+@Mod(RecursiveResources.MODID)
+public class RecursiveResources
+{
+	public Object client;
+	
+	public static final String MODID = "recursiveresources";
+	
+    public static final Logger LOGGER = LogManager.getLogger();
+    
+    public static ResourceLocation id(String path) {
+        return new ResourceLocation(MODID, path);
     }
 
-    @Override
-    public void registerConversations(ConversationManager conversationManager) {
-        conversationManager.registerSource(
-                JsonSource.fromUrl("https://raw.githubusercontent.com/enjarai/recursive-resources/master/src/main/resources/cicada/recursiveresources/conversations.json")
-                        .or(JsonSource.fromResource("cicada/recursiveresources/conversations.json")),
-                LOGGER::info
-        );
-    }
-
-    public static Identifier id(String path) {
-        return new Identifier(MOD_ID, path);
+    public RecursiveResources() {
+//        DistExecutor.runWhenOn(Dist.CLIENT, () -> new Runnable() {
+//		@Override
+//		public void run() {
+//			client = new XenoTechClient();
+//		}});
     }
 }

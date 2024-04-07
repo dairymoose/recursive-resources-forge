@@ -1,16 +1,22 @@
 package nl.enjarai.recursiveresources.pack;
 
-import net.minecraft.resource.*;
-import net.minecraft.resource.ResourcePackProfile.InsertionPosition;
-import net.minecraft.text.Text;
-import nl.enjarai.recursiveresources.util.ResourcePackUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.function.Consumer;
 
-public class NestedFolderPackProvider implements ResourcePackProvider {
+import org.apache.commons.lang3.StringUtils;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.FilePackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.Pack.Position;
+import net.minecraft.server.packs.repository.RepositorySource;
+import net.minecraftforge.common.data.ExistingFileHelper.ResourceType;
+import nl.enjarai.recursiveresources.util.ResourcePackUtils;
+
+public class NestedFolderPackProvider implements RepositorySource {
     protected File root;
     protected int rootLength;
 
@@ -20,7 +26,7 @@ public class NestedFolderPackProvider implements ResourcePackProvider {
     }
 
     @Override
-    public void register(Consumer<ResourcePackProfile> profileAdder) {
+    public void loadPacks(Consumer<Pack> profileAdder) {
         File[] folders = root.listFiles(ResourcePackUtils::isFolderButNotFolderBasedPack);
 
         for (File folder : ResourcePackUtils.wrap(folders)) {
@@ -28,7 +34,7 @@ public class NestedFolderPackProvider implements ResourcePackProvider {
         }
     }
 
-    public void processFolder(File folder, Consumer<ResourcePackProfile> profileAdder) {
+    public void processFolder(File folder, Consumer<Pack> profileAdder) {
         if (ResourcePackUtils.isFolderBasedPack(folder)) {
             addPack(folder, profileAdder);
             return;
@@ -47,26 +53,26 @@ public class NestedFolderPackProvider implements ResourcePackProvider {
         }
     }
 
-    public void addPack(File fileOrFolder, Consumer<ResourcePackProfile> profileAdder) {
+    public void addPack(File fileOrFolder, Consumer<Pack> profileAdder) {
         String displayName = fileOrFolder.getName();
         String name = "file/" + StringUtils.removeStart(
                 fileOrFolder.getAbsolutePath().substring(rootLength).replace('\\', '/'), "/");
-        ResourcePackProfile info;
+        Pack info;
         Path rootPath = root.toPath();
         Path filePath = rootPath.relativize(fileOrFolder.toPath());
         FolderedPackSource packSource = new FolderedPackSource(rootPath, filePath);
 
         if (fileOrFolder.isDirectory()) {
-            info = ResourcePackProfile.create(
-                    name, Text.literal(displayName), false,
-                    (packName) -> new DirectoryResourcePack(packName, fileOrFolder.toPath(), true),
-                    ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, packSource
+            info = Pack.readMetaAndCreate(
+                    name, Component.literal(displayName), false,
+                    (packName) -> new PathPackResources(packName, fileOrFolder.toPath(), true),
+                    PackType.CLIENT_RESOURCES, Position.TOP, packSource
             );
         } else {
-            info = ResourcePackProfile.create(
-                    name, Text.literal(displayName), false,
-                    (packName) -> new ZipResourcePack(packName, fileOrFolder, true),
-                    ResourceType.CLIENT_RESOURCES, InsertionPosition.TOP, packSource
+            info = Pack.readMetaAndCreate(
+                    name, Component.literal(displayName), false,
+                    (packName) -> new FilePackResources(packName, fileOrFolder, true),
+                    PackType.CLIENT_RESOURCES, Position.TOP, packSource
             );
         }
 
