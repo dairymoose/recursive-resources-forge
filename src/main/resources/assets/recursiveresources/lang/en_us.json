@@ -5,6 +5,6 @@
   "recursiveresources.view.flat": "Flat View",
   "recursiveresources.folder.back": "(Back)",
   "recursiveresources.folder.folder": "(Folder)",
-  "availablepacks.title.hover": "Enable all",
-  "selectedpacks.title.hover": "Disable all"
+  "recursiveresources.availablepacks.title.hover": "Enable all",
+  "recursiveresources.selectedpacks.title.hover": "Disable all"
 }

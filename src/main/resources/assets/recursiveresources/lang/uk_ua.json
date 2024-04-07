@@ -5,6 +5,6 @@
   "recursiveresources.view.flat": "Плоский вигляд",
   "recursiveresources.folder.back": "(Назад)",
   "recursiveresources.folder.folder": "(Папка)",
-  "availablepacks.title.hover": "Вимкнути все",
-  "selectedpacks.title.hover": "Вимкнути все"
+  "recursiveresources.availablepacks.title.hover": "Вимкнути все",
+  "recursiveresources.selectedpacks.title.hover": "Вимкнути все"
 }

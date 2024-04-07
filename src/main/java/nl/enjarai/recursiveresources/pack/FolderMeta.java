@@ -114,14 +114,14 @@ public record FolderMeta(Path icon, String description, List<Path> packs, boolea
 
         return Integer.MAX_VALUE;
     }
-
+    
     public boolean containsEntry(TransferableSelectionList.PackEntry entry, Path folder) {
         Path pack;
 
         if (entry.pack.getPackSource() instanceof FolderedPackSource folderedPackSource) {
             pack = folderedPackSource.file();
         } else if (entry.pack.getPackSource() == PackSource.BUILT_IN) {
-            pack = EMPTY_PATH.resolve(entry.getPackId());
+            pack = EMPTY_PATH.resolve(entry.getPackId().replaceAll(":", "_"));
 
             if (folder.equals(EMPTY_PATH)) return true;
         } else {
