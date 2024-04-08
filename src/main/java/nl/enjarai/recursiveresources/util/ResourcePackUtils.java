@@ -54,6 +54,8 @@ public class ResourcePackUtils {
         } catch (Exception e) {
             RecursiveResources.LOGGER.error("Error determining source folder for pack: " + pack.packId(), e);
             return null;
+        } finally {
+        	pack.close();
         }
     }
 
