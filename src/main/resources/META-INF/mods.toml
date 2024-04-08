@@ -34,8 +34,7 @@ credits="Original mod by chylex, Recursive Resources by enjarai" #optional
 authors="enjarai, chylex" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-Enhances the Resource Pack menu by adding folder support for easier pack organization, ability to search packs by name or description, and new sorting options.
-'''
+Enhances the Resource Pack menu by adding folder support for easier pack organization, ability to search packs by name or description, and new sorting options.'''
 # A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
 [[dependencies.examplemod]] #optional
     # the modid of the dependency
